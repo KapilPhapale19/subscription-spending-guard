@@ -23,14 +23,13 @@ export default function LoginPage() {
       redirect: false,
     });
 
-    setLoading(false);
+  setLoading(false);
 
-    if (result?.error) {
-      setError("Invalid email or password");
-    } else {
-      router.push("/dashboard");
-      router.refresh();
-    }
+if (result?.error) {
+  setError("Invalid email or password");
+} else {
+  window.location.href = "/dashboard";
+}
   };
 
   return (

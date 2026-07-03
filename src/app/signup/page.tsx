@@ -38,14 +38,13 @@ export default function SignupPage() {
       redirect: false,
     });
 
-    setLoading(false);
+   setLoading(false);
 
-    if (result?.error) {
-      setError("Account created, but login failed. Please try logging in.");
-    } else {
-      router.push("/dashboard");
-      router.refresh();
-    }
+if (result?.error) {
+  setError("Account created, but login failed. Please try logging in.");
+} else {
+  window.location.href = "/dashboard";
+}
   };
 
   return (
