@@ -22,12 +22,12 @@ export async function POST() {
     );
   }
 
-  const subscriptionList = subscriptions
-    .map(
-      (s) =>
-        `${s.name}: ₹${s.cost}/${s.billingCycle}, category: ${s.category}, renews: ${s.renewalDate.toDateString()}`
-    )
-    .join("\n");
+const subscriptionList = subscriptions
+  .map(
+    (s: { name: string; cost: number; billingCycle: string; category: string; renewalDate: Date }) =>
+      `${s.name}: ₹${s.cost}/${s.billingCycle}, category: ${s.category}, renews: ${s.renewalDate.toDateString()}`
+  )
+  .join("\n");
 
   try {
     const completion = await groq.chat.completions.create({
