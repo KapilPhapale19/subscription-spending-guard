@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Subscription Spending Guard
 
-## Getting Started
+A full-stack web app that helps users track recurring subscriptions and get AI-powered insights into their spending habits — built for the House of Edtech Full Stack Developer assignment.
 
-First, run the development server:
+**Live App:** https://subscription-spending-guard.vercel.app
+**GitHub:** https://github.com/KapilPhapale19/subscription-spending-guard
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Problem Statement
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+People lose track of recurring subscription costs across multiple services, leading to unnoticed overspending. This app gives users a single place to log subscriptions, see their true monthly/yearly spend, and get AI-generated insights on where they might be overspending.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Framework:** Next.js 16 (App Router, TypeScript)
+- **Styling:** Tailwind CSS
+- **Database:** PostgreSQL (hosted on Neon)
+- **ORM:** Prisma 7 (with driver adapters)
+- **Authentication:** NextAuth v5 (Credentials provider, JWT sessions)
+- **AI:** Groq (Llama 3.3 70B) via `groq-sdk`
+- **Validation:** Zod
+- **Deployment:** Vercel
 
-## Learn More
+## Features
 
-To learn more about Next.js, take a look at the following resources:
+- Secure signup/login with hashed passwords (bcrypt)
+- JWT-based session management
+- Protected routes via middleware (unauthenticated users redirected to login)
+- Full CRUD for subscriptions (create, read, delete)
+- Real-time monthly/yearly spend calculation
+- AI-powered spending analysis using Groq — flags potentially wasteful subscriptions in plain language
+- Responsive, accessible UI
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Architecture
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Frontend & Backend:** Unified in Next.js using the App Router — pages in `src/app`, API routes in `src/app/api`
+- **Authentication flow:** Credentials provider validates email/password against hashed values in PostgreSQL → issues a signed JWT stored in an HTTP-only cookie → middleware verifies this token on every request to `/dashboard`
+- **Authorization:** Every subscription API route checks that the authenticated user's ID matches the resource's `userId` before allowing access — prevents users from viewing/deleting others' data (IDOR protection)
+- **AI integration:** User's subscription data is fetched server-side, formatted into a plain-text summary, and sent to Groq's API — the AI never has direct database access
 
-## Deploy on Vercel
+## Database Schema
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**User**
+- id, name, email (unique), password (hashed), createdAt
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Subscription**
+- id, name, cost, billingCycle, renewalDate, category, userId (foreign key → User), createdAt
+
+One-to-many relationship: one User has many Subscriptions, with cascade delete.
+
+## Security & Real-World Considerations
+
+- **Password security:** Passwords are hashed with bcrypt (10 salt rounds) before storage — plain text passwords are never stored or logged
+- **Authentication:** JWT-based sessions via NextAuth, stored in HTTP-only, secure cookies (not accessible via JavaScript, mitigating XSS-based token theft)
+- **Authorization (IDOR prevention):** All subscription routes verify resource ownership server-side before returning or modifying data
+- **Input validation:** All API inputs are validated with Zod schemas before touching the database, preventing malformed or malicious data
+- **SQL injection prevention:** Prisma's parameterized queries prevent raw SQL injection by design — no raw SQL is used anywhere in this project
+- **Environment variables:** All secrets (database URL, auth secret, AI API key) are stored in environment variables, never committed to source control
+- **Enumeration prevention:** Login intentionally returns identical errors for "user not found" and "wrong password," preventing attackers from discovering which emails are registered
+- **Known limitation:** Rate limiting is not yet implemented on auth or AI endpoints — a production deployment would add rate limiting (e.g., via Upstash Redis) to prevent brute-force login attempts and AI API abuse
+
+## Future Scope
+
+- Bank/SMS statement auto-import for automatic subscription detection
+- Email/push reminders before renewal dates
+- Spending trend charts over time
+- Rate limiting on auth and AI endpoints
+- Unit and integration test coverage
+- Multi-currency support
+
+
