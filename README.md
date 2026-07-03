@@ -68,3 +68,23 @@ One-to-many relationship: one User has many Subscriptions, with cascade delete.
 - Multi-currency support
 
 
+## Local Setup
+
+1. Clone the repo:https://github.com/KapilPhapale19/subscription-spending-guard.git
+
+2. Install dependencies: npm install
+
+3. Push the database schema:npx prisma db push
+
+4. Run the development server: npm run dev
+
+5. Open [http://localhost:3000](http://localhost:3000)
+
+## Deployment
+
+Deployed on Vercel with CI/CD — every push to `main` automatically triggers a new production build and deployment.
+
+---
+
+Built by Kapil Phapale
+[GitHub](https://github.com/KapilPhapale19) · [LinkedIn](https://www.linkedin.com/in/kapil-phapale-33449b31a)
